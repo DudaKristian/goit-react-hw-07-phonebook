@@ -1,27 +1,19 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { removeContact, getContact, getFilter } from 'features/phoneBookSlice';
+import { useGetContactsQuery, useDeleteContactMutation } from 'features/phoneBookSlice';
 
 const ContactList = () => {
     
-    const dispatch = useDispatch();
-    const contacts = useSelector(getContact);
-    const filter = useSelector(getFilter);
-    
-    const filterCheck = () => {
-        return contacts.filter(contact =>
-            contact.name.toLowerCase().includes(filter.toLowerCase())
-        );
-    }
+    const { data, error } = useGetContactsQuery();
+    const [deleteContact] = useDeleteContactMutation();
 
     return (
         <ul>
-            {filterCheck().map(contact => (
+            {data && !error && data.map(contact => (
             <li key={contact.id}>
             {contact.name}
             {contact.number}
                 <button
                     type="button" id={contact.id}
-                    onClick={() => dispatch(removeContact(contact.id))}
+                    onClick={() => deleteContact(contact.id)}
                 >
                     Delete
                 </button>    

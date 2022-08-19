@@ -1,43 +1,41 @@
-import { createSlice } from '@reduxjs/toolkit';
-import storage from 'redux-persist/lib/storage';
-import { persistReducer } from 'redux-persist';
+import { createApi, fetchBaseQuery  } from '@reduxjs/toolkit/query/react'
 
-const initialState = {
-    contacts: [],
-    filter: "",
-}
+const TAG_CONTACTS = "Contacts";
 
-export const phoneBookSlice = createSlice({
-    name: "contacts",
-    initialState,
-    reducers: {
-        addContact: (state, action) => {
-            state.contacts = [action.payload, ...state.contacts];
-        },
-        removeContact: (state, action) => {
-            state.contacts = state.contacts.filter(
-                contact => contact.id !== action.payload
-            );
-        },
-        setFilter(state, action) {
-            state.filter = action.payload;
-        },
-    }
-});
+export const contactsApi = createApi({
+    reducerPath: 'contacts',
+    baseQuery: fetchBaseQuery({ baseUrl: 'https://62fe47e641165d66bfbcab41.mockapi.io/api/v1' }),
+    tagTypes: [TAG_CONTACTS],
+    endpoints: (builder) => ({
+        getContacts: builder.query({
+            query: () => `/contacts`,
+            providesTags: [TAG_CONTACTS]
+        }),
+        filterContactsByName: builder.query({
+            query: id => `/contacts/${id}`,
+            providesTags: [TAG_CONTACTS]
+        }),
+        addContact: builder.mutation({
+            query: contact => ({
+                url: "/contacts",
+                method: "POST",
+                body: contact
+            }),
+            invalidatesTags: [TAG_CONTACTS],
+        }),
+        deleteContact: builder.mutation({
+            query: id => ({
+                url: `/contacts/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: [TAG_CONTACTS],
+        })
+    }),
+})
 
-const persistConfig = {
-    key: 'contacts',
-    storage,
-    whitelist: ['contacts'],
-};
-
-export const ReducerContact = persistReducer(
-    persistConfig,
-    phoneBookSlice.reducer
-);
-
-export const { addContact, removeContact, setFilter } = phoneBookSlice.actions;
-
-export const getContact = state => state.contacts.contacts;
-
-export const getFilter = state => state.contacts.filter;
+export const {
+    useGetContactsQuery,
+    useAddContactMutation,
+    useDeleteContactMutation,
+    useFilterContactsByNameQuery
+} = contactsApi

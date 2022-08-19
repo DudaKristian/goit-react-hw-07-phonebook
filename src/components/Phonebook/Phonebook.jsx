@@ -1,7 +1,6 @@
 import { useState } from "react";
 import shortId from "shortid";
-import { useSelector, useDispatch } from 'react-redux';
-import { getContact, addContact } from "features/phoneBookSlice";
+import { useAddContactMutation, useGetContactsQuery} from "features/phoneBookSlice";
 
 const Phonebook = () => {
 
@@ -11,9 +10,9 @@ const Phonebook = () => {
     const nameInputId = shortId.generate();
     const numberInputId = shortId.generate();
 
-    const dispatch = useDispatch();
-    const contacts = useSelector(getContact);
-
+    const { data } = useGetContactsQuery();
+    const [addContact] = useAddContactMutation();
+    
     const onInputChange = e => {
         
         const { name, value } = e.target
@@ -30,19 +29,19 @@ const Phonebook = () => {
         }    
     }
     
-    const addContacts = data => {
+    const addContacts = input => {
         const contactName =
-            contacts.map(contact =>
+            data.map(contact =>
                 contact.name.toLowerCase())
-    
-        if (!contactName.includes(data.name.toLowerCase())) {
-            dispatch(addContact(data))
+
+        if (!contactName.includes(input.name.toLowerCase())) {
+            addContact(input)
 
             setName("")
             setNumber("")
 
         } else {
-            return alert(`${data.name} is allready in contacts`)
+            return alert(`${input.name} is allready in contacts`)
         } 
     };
     
@@ -61,9 +60,7 @@ const Phonebook = () => {
     };
 
         return (
-            <div>
-            
-                <form onSubmit={onSubmitHandle}>
+            <form onSubmit={onSubmitHandle}>
                 <label htmlFor={nameInputId}>
                     Name
                     <input
@@ -94,7 +91,6 @@ const Phonebook = () => {
                 <br />
                 <button type="submit">Add contact</button>
             </form>
-            </div>
         )       
     }
 

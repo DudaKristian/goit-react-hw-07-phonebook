@@ -1,26 +1,41 @@
 import shortId from "shortid"
-import { useSelector, useDispatch } from 'react-redux';
-import { getFilter, setFilter } from "features/phoneBookSlice";
+
+import {  useGetContactsQuery } from "features/phoneBookSlice";
+// useFilterContactsByNameQuery
 
 const Filter = () => {
     
-    const dispatch = useDispatch();
-    const filter = useSelector(getFilter);
+    const { data } = useGetContactsQuery();
+
+    let result = [];
+
+    const onChange = e => {
+        const normalizedContact = e.target.value;
+        for (const contact of data){
+            if (contact.name.toLowerCase().includes(normalizedContact)) {
+                result.push(contact.id);
+                return result
+            }
+       }
+    }
     
+    // const {data: filter} = useFilterContactsByNameQuery(() => onChange())
+
+    
+
     const filterInputId = shortId.generate();
     
     return (
-        <div>
-            <label htmlFor={filterInputId}>
-                Find contacts by name <br />
-                <input type="text"
-                    name="filter"
-                    id={filterInputId}
-                    onChange={e => dispatch(setFilter(e.target.value))}
-                    value = {filter}
-                    />
-            </label>
-        </div>
+        // <></>
+        <label htmlFor={filterInputId}>
+            Find contacts by name <br />
+            <input type="text"
+                name="filter"
+                id={filterInputId}
+                onChange={onChange}
+                // value = {filter}
+                />
+        </label>
     )
 }
 
